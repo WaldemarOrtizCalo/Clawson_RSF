@@ -37,3 +37,28 @@ vignettes/*.pdf
 
 # R Environment Variables
 .Renviron
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+*.csv
+*.pdf
+*.ige
+*.img
+*.rde
+*.rrd
+*.xml
+*.dbf
+*.prj
+*.shp
+*.shx
+*.tif
+*.zip
+*.stk
+*.xlsx
+*.jpeg
+*.png
+
+# Folders 
+1.Data
+
