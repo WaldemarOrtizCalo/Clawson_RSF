@@ -18,6 +18,7 @@ library(mapview)
 library(adehabitatHR)
 library(foreach)
 library(doParallel)
+library(pbapply)
 
 #      Functions                                                            ####
 source("D:/Drive/Research/UMontana/2.INPROGRESS/2.Clawson_RSF/2.R_Code/2.Functions/reclass_matrices.R")
@@ -108,41 +109,143 @@ NLCD_south <- NLCD_south %>% reclassify(reclass_matrixSouth) %>% ratify()
 
 
 ###############################################################################
-#   [Covariate Extraction]                                                  ####
-#      [Making and registering cluster]                                     ####
-cl <- makeCluster(5)
+#   [Covariate Extraction:North]                                            ####
+#     [Making and registering cluster]                                      ####
+cl <- makeCluster(2)
 registerDoParallel(cl)
+clusterEvalQ(cl, library("tidyverse"))
 
-#      [North]                                                              ####
+#       [Used]                                                              ####
+
+# Establishing 420 meter buffers around points
+extracts <- terra::extract(NLCD_north, deer_north_sf, buffer = 420)
+
+clusterExport(cl, c("extracts"))
+
+
+covariates_north_used <- pblapply(1:length(extracts),
+                                  FUN = function(iterator){
+                                    tryCatch(expr = {counts_x <- table(extracts[[iterator]])
+                                    
+                                    proportions_x <- prop.table(counts_x) %>% 
+                                      as.data.frame() %>% 
+                                      pivot_wider(names_from = Var1, values_from = Freq,names_prefix = "proportion_") %>% 
+                                      add_column("choice" = 1,.before = 1) %>% 
+                                      add_column("iterator" = iterator,.before = 1)
+                                    
+                                    return(proportions_x)},
+                                    error=function(e) data.frame("iterator" = iterator))}, 
+                                  cl = cl) %>% bind_rows()
+# Stopping Cluster 
+stopCluster(cl)
+
+# Eliminating Rows that are all NA 
+covariates_north_used <- covariates_north_used[rowSums(is.na(covariates_north_used)) != ncol(covariates_north_used)-1,]
+
+#     [Making and registering cluster]                                      ####
+cl <- makeCluster(2)
+registerDoParallel(cl)
+clusterEvalQ(cl, library("tidyverse"))
+
+#       [Available]                                                         ####
+
+# Creating available points
+available_north <- st_sample(deer_north_mcp_sf,size = nrow(covariates_north_used)) %>% st_as_sf()
+
+# Establishing 420 meter buffers around points
+extracts <- terra::extract(NLCD_north, available_north, buffer = 420)
+
+clusterExport(cl, c("extracts"))
+
+covariates_north_available <- pblapply(1:length(extracts),
+                                  FUN = function(iterator){
+                                    tryCatch(expr = {counts_x <- table(extracts[[iterator]])
+                                    
+                                    proportions_x <- prop.table(counts_x) %>% 
+                                      as.data.frame() %>% 
+                                      pivot_wider(names_from = Var1, values_from = Freq,names_prefix = "proportion_") %>% 
+                                      add_column("choice" = 0,.before = 1) %>% 
+                                      add_column("iterator" = iterator,.before = 1)
+                                    
+                                    return(proportions_x)},
+                                    error=function(e) data.frame("iterator" = iterator))}, 
+                                  cl = cl) %>% bind_rows()
+
+# Stopping Cluster 
+stopCluster(cl)
+
+#     [Joining Data]                                                        ####
+
+north_final_data <- bind_rows(covariates_north_used,covariates_north_available)
+
+
+###############################################################################
+#      [Covariate Extraction:South]                                         ####
+
 #        [Used]                                                             ####
 
 # Establishing 420 meter buffers around points
+extracts <- terra::extract(NLCD_south, deer_south_sf, buffer = 420)
+length(extracts)
 
-
-extracts <- terra::extract(NLCD_north, deer_north_sf, buffer = 420)
-
-landcover_proportions <- foreach(i = 1:length(extracts),.combine = bind_rows) %dopar% {
-  
+covariates_south_used <- foreach(i = 1:length(extracts),.combine = bind_rows) %dopar% {
+  library(tidyverse)
   counts_x <- table(extracts[[i]])
   
   proportions_x <- prop.table(counts_x) %>% 
     as.data.frame() %>% 
-    pivot_wider(names_from = Var1, values_from = Freq,names_prefix = "proportion_")}
-
+    pivot_wider(names_from = Var1, values_from = Freq,names_prefix = "proportion_")} %>% 
+  
+  add_column("choice" = 1,
+             .before = 1)
 
 #        [Available]                                                        ####
+
+# Creating available points
+available_south <- st_sample(deer_south_mcp_sf,size = 10) %>% st_as_sf()
+
+# Establishing 420 meter buffers around points
+extracts <- terra::extract(NLCD_south, available_south, buffer = 420)
+
+length(extracts)
+
+covariates_south_available <- foreach(i = 1:length(extracts),.combine = bind_rows) %dopar% {
+  library(tidyverse)
+  counts_x <- table(extracts[[i]])
+  
+  proportions_x <- prop.table(counts_x) %>% 
+    as.data.frame() %>% 
+    pivot_wider(names_from = Var1, values_from = Freq,names_prefix = "proportion_")} %>% 
+  
+  add_column("choice" = 0,
+             .before = 1)
+
 #        [Joining Data]                                                     ####
 
-
-available <- st_sample(deer_north_mcp_sf,
-                       size = 10)
-
-
-mapview(available)
-#      [South]                                                              ####
+south_final_data <- bind_rows(covariates_south_used,covariates_south_available)
 
 
 
 #      [Closing back-end cluster]                                           ####
 
 unregister()
+
+###############################################################################
+#   [Data Organization/Export]                                              ####
+#      [Data Organization]                                                  ####
+#        [North]                                                            ####
+
+# Removing rows that are all NA 
+north_final_clean <- north_final_data[rowSums(is.na(north_final_data)) != ncol(north_final_data)-1,]
+
+# Making NAs 0 which indiciated zero of x resource
+north_final_clean[is.na(north_final_clean)] <- 0
+
+# Exporting Data
+write_csv(x = north_final_clean,
+          file = "3.Outputs/deer_north_final.csv")
+
+
+#        [South]                                                            ####
+
+
