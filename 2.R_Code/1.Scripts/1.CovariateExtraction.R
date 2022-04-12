@@ -35,10 +35,10 @@ unregister <- function() {
 
 #      Data                                                                 ####
 #        [Deer Locations]                                                   ####
-deer <- read_csv("1.Data/deer_all_clean.csv")
+deer <- read_csv("1.Data/RawData/deer_all_clean.csv")
 
 #        [Rasters]                                                          ####
-NLCD <- raster("1.Data/NLCD_Missouri.tif") %>% ratify()
+NLCD <- raster("1.Data/RawData/NLCD_Missouri.tif") %>% ratify()
 
 ###############################################################################
 #   [Study Population Boundaries]                                           ####
