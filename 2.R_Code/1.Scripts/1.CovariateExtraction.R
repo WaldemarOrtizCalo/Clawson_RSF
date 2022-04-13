@@ -179,6 +179,18 @@ stopCluster(cl)
 north_final_data <- bind_rows(covariates_north_used,covariates_north_available)
 
 
+#     [Data Organization/Export]                                            ####
+
+# Removing rows that are all NA 
+north_final_clean <- north_final_data[rowSums(is.na(north_final_data)) != ncol(north_final_data)-1,]
+
+# Making NAs 0 which indiciated zero of x resource
+north_final_clean[is.na(north_final_clean)] <- 0
+
+# Exporting Data
+write_csv(x = north_final_clean,
+          file = "1.Data\\CleanData/deer_north_final.csv")
+
 ###############################################################################
 #   [Covariate Extraction:South]                                            ####
 
@@ -251,21 +263,15 @@ stopCluster(cl)
 south_final_data <- bind_rows(covariates_south_used,covariates_south_available)
 
 
-###############################################################################
-#   [Data Organization/Export]                                              ####
-#      [Data Organization]                                                  ####
-#        [North]                                                            ####
+#     [Data Organization/Export]                                            ####
 
 # Removing rows that are all NA 
-north_final_clean <- north_final_data[rowSums(is.na(north_final_data)) != ncol(north_final_data)-1,]
+south_final_clean <- south_final_data[rowSums(is.na(south_final_data)) != ncol(south_final_data)-1,]
 
 # Making NAs 0 which indiciated zero of x resource
-north_final_clean[is.na(north_final_clean)] <- 0
+south_final_clean[is.na(south_final_clean)] <- 0
 
 # Exporting Data
-write_csv(x = north_final_clean,
-          file = "3.Outputs/deer_north_final.csv")
-
-
-#        [South]                                                            ####
+write_csv(x = south_final_clean,
+          file = "1.Data/CleanData/deer_south_final.csv")
 ###############################################################################
