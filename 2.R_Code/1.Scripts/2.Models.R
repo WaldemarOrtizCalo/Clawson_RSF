@@ -104,6 +104,10 @@ model_north_dredge <- dredge(model_north_global)
 
 summary(model_north_dredge)
 
+# Saving Dredge Output
+write_csv(x = model_north_dredge,
+          file = "3.Outputs/ModelOutputs/NorthDredge.csv")
+
 #      [South]                                                              ####
 
 # Global Model
@@ -114,6 +118,12 @@ model_south_global <- glm(choice ~ proportion_1 + proportion_2 + proportion_3 + 
 summary(model_south_global)
 
 # Dredge Model
-model_north_dredge <- dredge(model_south_global)
+model_south_dredge <- dredge(model_south_global)
 
-summary(model_north_dredge)
+summary(model_south_dredge)
+
+# Saving Dredge Output
+write_csv(x = model_south_dredge,
+          file = "3.Outputs/ModelOutputs/SouthDredge.csv")
+
+###############################################################################
