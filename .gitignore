@@ -59,6 +59,8 @@ vignettes/*.pdf
 *.jpeg
 *.png
 
+*.html
+
 # Folders 
 1.Data
 
