@@ -17,12 +17,31 @@ library(reshape2)
 library(magrittr)
 library(MuMIn)
 #      Functions                                                            ####
-
 #      Data                                                                 ####
 
 # Data 
-deer_north <- read_csv("1.Data/CleanData/deer_north_final.csv")
-deer_south <- read_csv("1.Data/CleanData/deer_south_final.csv")
+deer_north <- read_csv("1.Data/CleanData/deer_north_final.csv") %>% 
+  rename(proportion_water = proportion_1,
+         proportion_developed = proportion_2,
+         proportion_barren = proportion_3,
+         proportion_forest = proportion_4,
+         proportion_shrub = proportion_5,
+         proportion_grassland = proportion_6,
+         proportion_cropland = proportion_7,
+         proportion_wetland = proportion_8)
+
+deer_south <- read_csv("1.Data/CleanData/deer_south_final.csv") %>% 
+  rename(proportion_water = proportion_1,
+         proportion_developed = proportion_2,
+         proportion_barren = proportion_3,
+         proportion_decidousforest = proportion_4,
+         proportion_evergreenforest = proportion_5,
+         proportion_mixedforest = proportion_6,
+         proportion_shrub = proportion_7,
+         proportion_grassland = proportion_8,
+         proportion_cropland = proportion_9,
+         proportion_wetland = proportion_10)
+
 
 # Making Choice a factor
 deer_north$choice <- factor(deer_north$choice, levels = c("0","1"))
@@ -47,13 +66,14 @@ ggsave(filename = "north_corplot.png",
 boxwhisk_data <- pivot_longer(deer_north,cols = starts_with("proportion"))
 
 north_boxwhisk <- ggplot(boxwhisk_data, aes(x = name,y = value, fill = choice))+
-  geom_boxplot() 
+  geom_boxplot() +
+  labs(x = "covariates")
 
 ggsave(filename = "north_boxwhisk.png",
        plot = north_boxwhisk,
        device = "png",
        path = "3.Outputs/Models_ExploratoryPlots",
-       width = 10,
+       width = 14,
        height = 6,
        units = "in"
        )
@@ -76,13 +96,14 @@ ggsave(filename = "south_corplot.png",
 boxwhisk_data <- pivot_longer(deer_south,cols = starts_with("proportion"))
 
 south_boxwhisk <- ggplot(boxwhisk_data, aes(x = name,y = value, fill = choice))+
-  geom_boxplot() 
+  geom_boxplot() +
+  labs(x = "covariates")
 
 ggsave(filename = "south_boxwhisk.png",
        plot = south_boxwhisk,
        device = "png",
        path = "3.Outputs/Models_ExploratoryPlots",
-       width = 10,
+       width = 16,
        height = 6,
        units = "in"
 )
@@ -93,11 +114,14 @@ ggsave(filename = "south_boxwhisk.png",
 #      [North]                                                              ####
 
 # Global Model
-model_north_global <- glm(choice ~ proportion_1 + proportion_2 + proportion_3 + proportion_4 + 
-                            proportion_5 + proportion_6 + proportion_8, 
-                          data = deer_north, family = "binomial", na.action = "na.fail")
+model_north_global <- glm(choice ~ proportion_water + proportion_developed +
+                             proportion_barren + proportion_forest + proportion_shrub + 
+                             proportion_grassland +  proportion_wetland,
+                          data = deer_north, family = binomial(link='logit'), na.action = "na.fail")
+
 
 summary(model_north_global)
+
 
 # Dredge Model
 model_north_dredge <- dredge(model_north_global)
@@ -111,9 +135,18 @@ write_csv(x = model_north_dredge,
 #      [South]                                                              ####
 
 # Global Model
-model_south_global <- glm(choice ~ proportion_1 + proportion_2 + proportion_3 + proportion_4 + 
-                            proportion_5 + proportion_6 + proportion_8 + proportion_9 + proportion_10, 
-                          data = deer_south, family = "binomial", na.action = "na.fail")
+model_south_global <- glm(choice ~ proportion_water +
+                            proportion_developed +
+                            proportion_barren +
+                            proportion_decidousforest +
+                            proportion_evergreenforest +
+                            proportion_mixedforest +
+                            proportion_shrub +
+                            proportion_grassland +
+                            proportion_wetland, 
+                          data = deer_south, family = binomial(link='logit'), na.action = "na.fail")
+
+
 
 summary(model_south_global)
 
