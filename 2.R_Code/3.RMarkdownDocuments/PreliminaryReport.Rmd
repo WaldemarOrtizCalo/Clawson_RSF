@@ -1,0 +1,77 @@
+---
+title: "Report"
+author: "Waldemar Ortiz-Calo"
+date: '2022-04-15'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# Packages
+library(here)
+library(tidyverse)
+library(gt)
+
+# Data 
+ 
+north <- read_csv("3.Outputs/ModelOutputs/NorthDredge.csv")
+south <- read_csv("3.Outputs/ModelOutputs/SouthDredge.csv")
+```
+
+
+## North 
+
+### Box and Whisker Plot
+
+```{r, echo=FALSE}
+
+knitr::include_graphics("D:\\Drive\\Research\\UMontana\\2.INPROGRESS\\2.Clawson_RSF\\3.Outputs\\Models_ExploratoryPlots\\north_boxwhisk.png")
+
+```
+
+### Correlation Plot
+
+```{r, echo=FALSE}
+
+knitr::include_graphics("D:\\Drive\\Research\\UMontana\\2.INPROGRESS\\2.Clawson_RSF\\3.Outputs\\Models_ExploratoryPlots\\north_corplot.png")
+
+```
+
+### Dredge Model
+ 
+```{r echo=FALSE}
+
+north %>% slice(1:10) %>% 
+  gt()
+
+```
+ 
+
+## South 
+
+### Box and Whisker Plot
+
+```{r, echo=FALSE}
+
+knitr::include_graphics("D:\\Drive\\Research\\UMontana\\2.INPROGRESS\\2.Clawson_RSF\\3.Outputs\\Models_ExploratoryPlots\\south_boxwhisk.png")
+
+```
+
+### Correlation Plot
+
+```{r, echo=FALSE}
+
+knitr::include_graphics("D:\\Drive\\Research\\UMontana\\2.INPROGRESS\\2.Clawson_RSF\\3.Outputs\\Models_ExploratoryPlots\\south_corplot.png")
+
+```
+
+### Dredge Model
+ 
+```{r echo=FALSE}
+
+south %>% slice(1:10) %>% 
+  gt()
+
+```
+ 
