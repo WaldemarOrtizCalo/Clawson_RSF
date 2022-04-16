@@ -39,16 +39,17 @@ South_shp <- subset(Missouri_shp, name_ucase %in% as.vector(counties_south$Count
 
 ###############################################################################
 #   [Raster Prep]                                                           ####
+
 #      [Cropping NLCD Rasters, Ratifying, and Reclassifying]                ####
+
 North_NLCD <- crop(Missouri_NLCD,North_shp) %>% mask(North_shp) %>% ratify() %>% 
   reclassify(reclass_matrixNorth)
 
 South_NLCD <- crop(Missouri_NLCD,South_shp) %>% mask(South_shp) %>% ratify() %>% 
   reclassify(reclass_matrixSouth)
 
-
-
 ###############################################################################
+
 # DEV 
 library(landscapemetrics)
 test_raster <- raster(matrix(rep(c(1,2,2,1,3),10),ncol = 5,byrow = T))
