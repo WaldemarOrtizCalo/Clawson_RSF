@@ -159,4 +159,14 @@ summary(model_south_dredge)
 write_csv(x = model_south_dredge,
           file = "3.Outputs/ModelOutputs/SouthDredge.csv")
 
+#      [Model Exports]                                                      ####
+
+# North
+saveRDS(model_north_global,
+        file = "3.Outputs/ModelOutputs/GlobalModelNorth")
+
+# South
+saveRDS(model_south_global,
+        file = "3.Outputs/ModelOutputs/GlobalModelSouth")
+
 ###############################################################################
