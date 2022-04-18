@@ -240,6 +240,15 @@ predictive_raster_south <- exp(South_model_coefs[1] +
             South_model_coefs[9]*South_prop_rasters[[9]]+
             South_model_coefs[10]*South_prop_rasters[[2]]))
 
+#      [Exporting]                                                              ####
+
+# North 
+writeRaster(predictive_raster_north,
+            filename = "3.Outputs/PredictiveRasters/North_PredictiveRasters.tif")
+
+writeRaster(predictive_raster_south,
+            filename = "3.Outputs/PredictiveRasters/South_PredictiveRasters.tif")
+# South
 
 #      [Checking Predictive Maps]                                           ####
 
