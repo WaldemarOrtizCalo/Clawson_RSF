@@ -20,6 +20,7 @@ library(doParallel)
 #      Functions                                                            ####
 source("2.R_Code/2.Functions/reclass_matrices.R")
 raster_prop_creation <- function(raster,landcover_num, export = F, export.filepath = NULL){ 
+  
   if(export == F){
   r <- raster == landcover_num 
   r <- r %>% ratify
@@ -147,14 +148,14 @@ North_prop_rasters <- lapply(list.files("1.Data/CleanData",
                                         pattern = "North_proportion",
                                         full.names = T), raster) %>% 
   stack() %>% 
-  dropLayer(i = 7) # Elimnating Cropland since it was highly correlated
+  dropLayer(i = 7) # Eliminating Cropland since it was highly correlated
 
 # South 
 South_prop_rasters <- lapply(list.files("1.Data/CleanData",
                                         pattern = "South_proportion",
                                         full.names = T), raster) %>% 
   stack() %>% 
-  dropLayer(i = 10) # Elimnating Cropland since it was highly correlated
+  dropLayer(i = 10) # Eliminating Cropland since it was highly correlated
 
 
 #      [Loading Predictive Models]                                          ####
@@ -240,7 +241,7 @@ predictive_raster_south <- exp(South_model_coefs[1] +
             South_model_coefs[9]*South_prop_rasters[[9]]+
             South_model_coefs[10]*South_prop_rasters[[2]]))
 
-#      [Exporting]                                                              ####
+#      [Exporting]                                                          ####
 
 # North 
 writeRaster(predictive_raster_north,
