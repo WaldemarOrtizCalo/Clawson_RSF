@@ -16,6 +16,7 @@ library(sf)
 library(mapview)
 library(pbapply)
 library(doParallel)
+library(stringr)
 
 #      Functions                                                            ####
 source("2.R_Code/2.Functions/reclass_matrices.R")
@@ -65,9 +66,16 @@ Missouri_shp <- st_read("1.Data/RawData/shp_Missouri.shp")
 Missouri_NLCD <- raster("1.Data/RawData/NLCD_Missouri.tif")
 
 #        [Regions]                                                          ####
+# Regions
 Regions <- read_csv("1.Data/RawData/Regions_Clawson.csv")
+
+# Fixing FIPS by eliminating 29 in front
+Regions$county_fips <- str_replace(as.character(Regions$county_fips),"29","")
+
+# Dividing by Study Area
 counties_north <- filter(Regions, North_South == "North")
 counties_south <- filter(Regions, North_South == "South")
+
 
 #        [Models]                                                           ####
 
@@ -79,8 +87,8 @@ South_model <- readRDS(file = "3.Outputs/ModelOutputs/GlobalModelSouth")
 ###############################################################################
 #   [Subsetting Shapefiles by Regions]                                      ####
 
-North_shp <- subset(Missouri_shp, name_ucase %in% as.vector(counties_north$County))
-South_shp <- subset(Missouri_shp, name_ucase %in% as.vector(counties_south$County))
+North_shp <- subset(Missouri_shp, countyfips  %in% as.vector(counties_north$county_fips))
+South_shp <- subset(Missouri_shp, countyfips  %in% as.vector(counties_south$county_fips))
 
 ###############################################################################
 #   [Raster Prep]                                                           ####
@@ -245,12 +253,13 @@ predictive_raster_south <- exp(South_model_coefs[1] +
 
 # North 
 writeRaster(predictive_raster_north,
-            filename = "3.Outputs/PredictiveRasters/North_PredictiveRasters.tif")
+            filename = "3.Outputs/PredictiveRasters/North_PredictiveRasters.tif",
+            overwrite=TRUE)
 
-writeRaster(predictive_raster_south,
-            filename = "3.Outputs/PredictiveRasters/South_PredictiveRasters.tif")
 # South
-
+writeRaster(predictive_raster_south,
+            filename = "3.Outputs/PredictiveRasters/South_PredictiveRasters.tif",
+            overwrite=TRUE)
 #      [Checking Predictive Maps]                                           ####
 
 # North 
